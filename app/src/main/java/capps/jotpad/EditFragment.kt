@@ -1,6 +1,7 @@
 package capps.jotpad
 
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -20,7 +21,6 @@ import capps.jotpad.room.NoteRepository
 import capps.jotpad.viewmodel.EditFragVM
 import capps.jotpad.viewmodelfactory.EditFragVMFactory
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.skydoves.colorpickerview.ActionMode
 import com.skydoves.colorpickerview.ColorEnvelope
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 
@@ -123,7 +123,15 @@ class EditFragment : Fragment(), ColorEnvelopeListener {
                 binding.save.setColorFilter(tintColor)
             }
 
-            requireActivity().window.statusBarColor = Color.parseColor(color)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requireActivity().window.statusBarColor = Color.parseColor(color)
+                val decor: View = requireActivity().window.decorView
+                if (Object.isColorBright(color)) {
+                    decor.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                } else {
+                    decor.systemUiVisibility = 0
+                }
+            }
 
             binding.root.setBackgroundColor(Color.parseColor(color))
             binding.appBar.setBackgroundColor(Color.parseColor(color))
