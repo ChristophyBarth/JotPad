@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="myViewModel"
             type="capps.jotpad.viewmodel.EditFragVM" />
@@ -14,9 +15,10 @@
         android:layout_height="match_parent"
         tools:context=".EditFragment">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <com.google.android.material.appbar.AppBarLayout
                 android:id="@+id/app_bar"
@@ -51,7 +53,7 @@
                         android:padding="8dp"
                         android:text="Editing On"
                         android:textSize="13sp"
-                        android:visibility="@{myViewModel.editing ? android.view.View.VISIBLE : android.view.View.GONE}" />
+                        android:visibility="@{myViewModel.editing? android.view.View.VISIBLE : android.view.View.GONE}" />
 
                     <ImageView
                         android:id="@+id/save"
@@ -72,43 +74,26 @@
 
             </com.google.android.material.appbar.AppBarLayout>
 
-
             <EditText
                 android:id="@+id/title"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_below="@id/app_bar"
                 android:layout_marginHorizontal="10dp"
                 android:background="@android:color/transparent"
                 android:ellipsize="end"
                 android:hint="Note Title"
+                android:inputType="text"
                 android:maxLines="1"
                 android:text="@={myViewModel.title}"
                 android:textSize="25sp"
-                android:textStyle="bold"
-                android:inputType="text" />
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="20dp"
-                android:layout_marginBottom="20dp"
-                android:onClick="@{()-> myViewModel.openBottomSheet()}"
-                android:src="@drawable/color_icon" />
+                android:textStyle="bold" />
 
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginBottom="10dp"
                 android:fillViewport="true"
-                android:layout_below="@id/title"
-                android:layout_alignStart="@id/title"
-                android:layout_alignEnd="@id/title"
-                android:layout_marginVertical="10dp"
                 android:focusable="false"
                 android:scrollbars="none">
 
@@ -124,7 +109,21 @@
 
             </ScrollView>
 
-        </RelativeLayout>
+        </LinearLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            android:onClick="@{()-> myViewModel.openBottomSheet()}"
+            android:src="@drawable/color_icon"
+            app:animateFAB="@{myViewModel.fabShouldShow}"
+            android:visibility="@{myViewModel.fabShouldShow? android.view.View.VISIBLE : android.view.View.INVISIBLE}" />
 
         <RelativeLayout
             android:id="@+id/bottom_sheet"
@@ -142,10 +141,10 @@
                 android:layout_height="48dp"
                 android:layout_alignTop="@id/done"
                 android:layout_alignBottom="@id/done"
+                android:drawablePadding="10dp"
                 android:gravity="center_vertical"
                 android:padding="10dp"
                 android:text="Choose Color"
-                android:drawablePadding="10dp"
                 android:textAlignment="gravity"
                 android:textSize="15sp"
                 app:drawableStartCompat="@drawable/paint_icon" />
@@ -180,8 +179,8 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
-                android:padding="10dp"
                 android:onClick="@{()-> myViewModel.closeBottomSheet()}"
+                android:padding="10dp"
                 android:text="Done"
                 android:textAlignment="gravity" />
 

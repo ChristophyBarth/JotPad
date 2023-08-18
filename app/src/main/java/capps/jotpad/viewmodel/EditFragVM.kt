@@ -25,6 +25,8 @@ class EditFragVM(val editing: Boolean, private val note: Note?, private val repo
     private val _closeBottomSheet = MutableLiveData<Event<Boolean>>()
     val closeBottomSheet : LiveData<Event<Boolean>> get() = _closeBottomSheet
 
+    val fabShouldShow = MutableLiveData(true)
+
     private val _backButton = MutableLiveData<Event<Boolean>>()
     val backButton : LiveData<Event<Boolean>> get() = _backButton
 
@@ -72,6 +74,17 @@ class EditFragVM(val editing: Boolean, private val note: Note?, private val repo
 
     fun closeBottomSheet(){
         _closeBottomSheet.value = Event(true)
+    }
+
+    fun showFAB(){
+        if (fabShouldShow.value != true) {
+            fabShouldShow.value = true
+        }
+    }
+    fun hideFAB(){
+        if (fabShouldShow.value != false) {
+            fabShouldShow.value = false
+        }
     }
 
     fun exit(){
