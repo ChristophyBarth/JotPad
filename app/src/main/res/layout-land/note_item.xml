@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginVertical="5dp"
+
+        app:cardCornerRadius="15dp"
+        app:cardElevation="20dp">
+
+        <RelativeLayout
+            android:id="@+id/relative_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                tools:text="This is a title" />
+
+            <TextView
+                android:id="@+id/body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/title"
+                android:ellipsize="end"
+                android:maxEms="6"
+                android:maxLines="4"
+                tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. At erat pellentesque adipiscing commodo. Nullam non nisi est sit amet. Tempus imperdiet nulla malesuada pellentesque elit eget gravida. Nulla aliquet enim tortor at auctor urna nunc id. Magna fermentum iaculis eu non diam phasellus vestibulum lorem. At imperdiet dui accumsan sit amet. Lorem donec massa sapien faucibus et molestie ac feugiat sed. At varius vel pharetra vel turpis nunc eget. Amet justo donec enim diam vulputate. Aliquet nibh praesent tristique magna sit amet purus. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. At erat pellentesque adipiscing commodo. Nullam non nisi est sit amet. Tempus imperdiet nulla malesuada pellentesque elit eget gravida. Nulla aliquet enim tortor at auctor urna nunc id. Magna fermentum iaculis eu non diam phasellus vestibulum lorem. At imperdiet dui accumsan sit amet. Lorem donec massa sapien faucibus et molestie ac feugiat sed. At varius vel pharetra vel turpis nunc eget. Amet justo donec enim diam vulputate. Aliquet nibh praesent tristique magna sit amet purus." />
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/body"
+                android:layout_alignParentEnd="true"
+                android:alpha="0.9"
+                android:drawablePadding="7dp"
+                android:padding="10dp"
+                android:textStyle="bold"
+                app:drawableStartCompat="@drawable/calender"
+                tools:text="10/08/2023" />
+
+        </RelativeLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</layout>

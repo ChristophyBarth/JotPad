@@ -54,8 +54,16 @@ class NoteViewHolder(private val binding: NoteItemBinding) : RecyclerView.ViewHo
             Object.textViewDrawableColor(binding.date,0,ContextCompat.getColor(context, R.color.white))
         }
 
-        binding.title.text = note.title
-        binding.body.text = note.body
+
+        if (note.title.isNotBlank()){
+            binding.title.text = note.title
+            binding.body.text = note.body
+        }else{
+            val extraction = extractFirstSentence(note.body)
+            binding.title.text = extraction.first
+            binding.body.text = extraction.second
+        }
+
         binding.relativeLayout.setBackgroundColor(Color.parseColor(note.color))
         binding.date.text = calculatedDate(note.time)
 
@@ -111,5 +119,17 @@ class NoteViewHolder(private val binding: NoteItemBinding) : RecyclerView.ViewHo
         }
 
         return timeDiff
+    }
+
+    private fun extractFirstSentence(input: String): Pair<String, String> {
+        val sentenceEnd = "[.!?\\,]| {2,}"
+        val sentenceRegex = "(.*?)(?=$sentenceEnd)".toRegex()
+
+        val matchResult = sentenceRegex.find(input)
+        val firstSentence = matchResult?.value ?: input
+
+        val remainingText = matchResult?.let { input.substring(it.range.last + 1).trim() } ?: ""
+
+        return Pair(firstSentence, remainingText)
     }
 }

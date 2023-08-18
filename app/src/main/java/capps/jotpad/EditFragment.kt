@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.view.animation.AnimationUtils
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -125,11 +128,10 @@ class EditFragment : Fragment(), ColorEnvelopeListener {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requireActivity().window.statusBarColor = Color.parseColor(color)
-                val decor: View = requireActivity().window.decorView
                 if (Object.isColorBright(color)) {
-                    decor.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                    requireActivity().window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                 } else {
-                    decor.systemUiVisibility = 0
+                    requireActivity().window.decorView.systemUiVisibility = 0
                 }
             }
 
@@ -140,6 +142,17 @@ class EditFragment : Fragment(), ColorEnvelopeListener {
         binding.colorPickerView.attachBrightnessSlider(binding.brightnessSlide)
         binding.colorPickerView.setColorListener(this)
 
+        binding.root.viewTreeObserver.addOnGlobalLayoutListener {
+            val heightDiff = binding.root.rootView.height - binding.root.height
+            val keyboardIsOpen = heightDiff > 200
+
+            if (keyboardIsOpen) {
+                editFragVM.hideFAB()
+            } else {
+                editFragVM.showFAB()
+            }
+        }
+
         requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (bottomSheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED) {
@@ -147,6 +160,8 @@ class EditFragment : Fragment(), ColorEnvelopeListener {
                     binding.fab.visibility = View.VISIBLE
                 } else {
                     isEnabled = false
+                    requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.colorPrimaryDark)
+                    requireActivity().window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
                     requireActivity().onBackPressedDispatcher.onBackPressed()
                 }
             }

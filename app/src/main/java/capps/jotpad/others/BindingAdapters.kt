@@ -1,15 +1,12 @@
 package capps.jotpad.others
 
 import android.view.View
+import android.view.animation.AnimationUtils
 import androidx.databinding.BindingAdapter
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 
-object BindingAdapters {
-
-    @JvmStatic
-    @BindingAdapter("bottomSheetBehaviourState")
-    fun setState(v: View, bottomSheetBehaviourState: Int) {
-        val viewBottomSheetBehaviour = BottomSheetBehavior.from(v)
-        viewBottomSheetBehaviour.state = bottomSheetBehaviourState
+@BindingAdapter("animateFAB")
+fun animateFAB(v: View, showFAB: Boolean) {
+    if (!showFAB) {
+        v.animation = AnimationUtils.loadAnimation(v.context, android.R.anim.slide_out_right)
     }
 }
