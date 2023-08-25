@@ -1,8 +1,8 @@
-
 package capps.jotpad.adapter
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -14,17 +14,21 @@ import capps.jotpad.R
 import capps.jotpad.databinding.NoteItemBinding
 import capps.jotpad.others.Object
 import capps.jotpad.room.Note
+import capps.jotpad.room.NotePriority
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
-class NoteAdapter(private val context: Context, private val notes: MutableList<Note>): RecyclerView.Adapter<NoteViewHolder>(){
+class NoteAdapter(private val context: Context, private val notes: MutableList<Note>) :
+    RecyclerView.Adapter<NoteViewHolder>() {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        val binding = DataBindingUtil.inflate<NoteItemBinding>(layoutInflater, R.layout.note_item, parent, false)
+        val binding = DataBindingUtil.inflate<NoteItemBinding>(
+            layoutInflater, R.layout.note_item, parent, false
+        )
 
         return NoteViewHolder(binding)
     }
@@ -38,27 +42,46 @@ class NoteAdapter(private val context: Context, private val notes: MutableList<N
     }
 }
 
-class NoteViewHolder(private val binding: NoteItemBinding) : RecyclerView.ViewHolder(binding.root){
-    fun bind(context: Context, note: Note){
+class NoteViewHolder(private val binding: NoteItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    fun bind(context: Context, note: Note) {
+        val drawable = binding.tag!!.background as GradientDrawable
+        drawable.mutate()
 
         val isColorBright = Object.isColorBright(note.color)
-        if (isColorBright){
+        if (isColorBright) {
             binding.title.setTextColor(Color.BLACK)
             binding.body.setTextColor(Color.BLACK)
             binding.date.setTextColor(Color.BLACK)
-            Object.textViewDrawableColor(binding.date,0,ContextCompat.getColor(context, R.color.black))
-        } else{
+            Object.textViewDrawableColor(
+                binding.date, 0, ContextCompat.getColor(context, R.color.black)
+            )
+        } else {
             binding.title.setTextColor(Color.WHITE)
             binding.body.setTextColor(Color.WHITE)
             binding.date.setTextColor(Color.WHITE)
-            Object.textViewDrawableColor(binding.date,0,ContextCompat.getColor(context, R.color.white))
+            Object.textViewDrawableColor(
+                binding.date, 0, ContextCompat.getColor(context, R.color.white)
+            )
         }
 
+        when (note.priority) {
+            NotePriority.LOW -> {
+                drawable.setColor(Color.parseColor(NotePriority.LOW.colorCode))
+            }
 
-        if (note.title.isNotBlank()){
+            NotePriority.Medium -> {
+                drawable.setColor(Color.parseColor(NotePriority.Medium.colorCode))
+            }
+
+            NotePriority.High -> {
+                drawable.setColor(Color.parseColor(NotePriority.High.colorCode))
+            }
+        }
+
+        if (note.title.isNotBlank()) {
             binding.title.text = note.title
             binding.body.text = note.body
-        }else{
+        } else {
             val extraction = extractFirstSentence(note.body)
             binding.title.text = extraction.first
             binding.body.text = extraction.second
@@ -73,7 +96,8 @@ class NoteViewHolder(private val binding: NoteItemBinding) : RecyclerView.ViewHo
 
             bundle.putBoolean("editing", true)
             bundle.putString("note", noteJsonString)
-            binding.root.findNavController().navigate(R.id.action_homeFragment_to_editFragment, bundle)
+            binding.root.findNavController()
+                .navigate(R.id.action_homeFragment_to_editFragment, bundle)
         }
     }
 
@@ -88,27 +112,28 @@ class NoteViewHolder(private val binding: NoteItemBinding) : RecyclerView.ViewHo
                 val simpleDateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
                 timeDiff = simpleDateFormat.format(time)
             }
+
             timeDifference > 86400000 -> {
                 //day
                 timeDiff = StringBuilder(
-                    (TimeUnit.MILLISECONDS.toDays(timeDifference))
-                        .toString()
+                    (TimeUnit.MILLISECONDS.toDays(timeDifference)).toString()
                 ).append("d ago").toString()
             }
+
             timeDifference > 3600000 -> {
                 //hour
                 timeDiff = StringBuilder(
-                    (TimeUnit.MILLISECONDS.toHours(timeDifference))
-                        .toString()
+                    (TimeUnit.MILLISECONDS.toHours(timeDifference)).toString()
                 ).append("h ago").toString()
             }
+
             timeDifference > 60000 -> {
                 //minutes
                 timeDiff = StringBuilder(
-                    (TimeUnit.MILLISECONDS.toMinutes(timeDifference))
-                        .toString()
+                    (TimeUnit.MILLISECONDS.toMinutes(timeDifference)).toString()
                 ).append("m ago").toString()
             }
+
             timeDifference > 0 -> {
                 timeDiff = "just now"
             }
