@@ -74,4 +74,7 @@ dependencies {
     //Koin
     implementation("io.insert-koin:koin-core:3.4.3")
     implementation("io.insert-koin:koin-android:3.4.3")
+
+    //Work Manager
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
 }

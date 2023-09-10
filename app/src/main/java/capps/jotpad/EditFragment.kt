@@ -6,9 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.view.animation.AnimationUtils
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -16,7 +13,10 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import capps.jotpad.databinding.FragmentEditBinding
+import capps.jotpad.others.NoteSaveWorker
 import capps.jotpad.others.Object
 import capps.jotpad.room.Note
 import capps.jotpad.room.NoteDatabase
@@ -26,9 +26,11 @@ import capps.jotpad.viewmodelfactory.EditFragVMFactory
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.skydoves.colorpickerview.ColorEnvelope
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
+import org.koin.core.Koin
 
 
 class EditFragment : Fragment(), ColorEnvelopeListener {
+    private lateinit var noteDatabase: NoteDatabase.Companion
     private lateinit var binding: FragmentEditBinding
     private lateinit var editFragVM: EditFragVM
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<RelativeLayout>
@@ -43,7 +45,8 @@ class EditFragment : Fragment(), ColorEnvelopeListener {
         val note = Object.MyGsonUtil().getGsonParser()
             .fromJson(requireArguments().getString("note"), Note::class.java)
 
-        val dao = NoteDatabase.getInstance(requireContext()).noteDAO
+        noteDatabase = NoteDatabase
+        val dao = noteDatabase.getInstance(requireContext()).noteDAO
         val repository = NoteRepository(dao)
         val factory = EditFragVMFactory(editing, note, repository)
 
@@ -75,7 +78,7 @@ class EditFragment : Fragment(), ColorEnvelopeListener {
             }
         }
 
-        editFragVM.backButton.observe(viewLifecycleOwner){ content ->
+        editFragVM.backButton.observe(viewLifecycleOwner) { content ->
             content.getContentIfNotHandled().let {
                 requireActivity().onBackPressedDispatcher.onBackPressed()
             }
@@ -129,7 +132,8 @@ class EditFragment : Fragment(), ColorEnvelopeListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requireActivity().window.statusBarColor = Color.parseColor(color)
                 if (Object.isColorBright(color)) {
-                    requireActivity().window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                    requireActivity().window.decorView.systemUiVisibility =
+                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                 } else {
                     requireActivity().window.decorView.systemUiVisibility = 0
                 }
@@ -160,8 +164,10 @@ class EditFragment : Fragment(), ColorEnvelopeListener {
                     binding.fab.visibility = View.VISIBLE
                 } else {
                     isEnabled = false
-                    requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.colorPrimaryDark)
-                    requireActivity().window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+                    requireActivity().window.statusBarColor =
+                        ContextCompat.getColor(requireContext(), R.color.colorPrimaryDark)
+                    requireActivity().window.decorView.systemUiVisibility =
+                        View.SYSTEM_UI_FLAG_VISIBLE
                     requireActivity().onBackPressedDispatcher.onBackPressed()
                 }
             }
@@ -173,6 +179,24 @@ class EditFragment : Fragment(), ColorEnvelopeListener {
     override fun onColorSelected(envelope: ColorEnvelope?, fromUser: Boolean) {
         if (fromUser) {
             editFragVM.colorReturned("#${envelope?.hexCode}")
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        Koin().close()
+        noteDatabase.closeDatabase()
+    }
+
+    private fun setOneTimeWorkRequest() {
+        val oneTimeWorkRequest = OneTimeWorkRequest.Builder(NoteSaveWorker::class.java).build()
+
+        val workManager = WorkManager.getInstance(requireContext().applicationContext).apply {
+            enqueue(oneTimeWorkRequest)
+            getWorkInfoByIdLiveData(oneTimeWorkRequest.id).observe(viewLifecycleOwner) {
+
+            }
         }
     }
 }
