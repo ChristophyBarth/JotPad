@@ -60,7 +60,7 @@ class EditFragment : Fragment(), ColorEnvelopeListener {
 
         editFragVM.openBottomSheet.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled().let {
-                binding.colorPickerView.setInitialColor(Color.parseColor(editFragVM.colorCode.value))
+                binding.colorPickerView.setInitialColor(Color.parseColor(editFragVM.colorCode.value!!.peekContent()))
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 binding.fab.visibility = View.INVISIBLE
             }
@@ -78,69 +78,73 @@ class EditFragment : Fragment(), ColorEnvelopeListener {
             }
         }
 
-        editFragVM.backButton.observe(viewLifecycleOwner) { content ->
+        editFragVM.backButtonClicked.observe(viewLifecycleOwner) { content ->
             content.getContentIfNotHandled().let {
                 requireActivity().onBackPressedDispatcher.onBackPressed()
             }
         }
 
-        editFragVM.colorCode.observe(viewLifecycleOwner) { color ->
-            if (Object.isColorBright(color)) {
-                binding.title.setTextColor(Color.BLACK)
-                binding.body.setTextColor(Color.BLACK)
-                binding.title.setHintTextColor(
-                    ContextCompat.getColor(
-                        requireContext(), R.color.hint_light
-                    )
-                )
-                binding.body.setHintTextColor(
-                    ContextCompat.getColor(
-                        requireContext(), R.color.hint_light
-                    )
-                )
-                binding.editing.setTextColor(Color.BLACK)
-                Object.changeDrawableTintColor(
-                    requireContext(), R.drawable.editing_txt_bg, R.color.black, binding.editing
-                )
+        editFragVM.colorCode.observe(viewLifecycleOwner) { content ->
 
-                val tintColor = ContextCompat.getColor(requireContext(), R.color.black)
-                binding.backButton.setColorFilter(tintColor)
-                binding.save.setColorFilter(tintColor)
-            } else {
-                binding.title.setTextColor(Color.WHITE)
-                binding.body.setTextColor(Color.WHITE)
-                binding.title.setHintTextColor(
-                    ContextCompat.getColor(
-                        requireContext(), R.color.hint_dark
-                    )
-                )
-                binding.body.setHintTextColor(
-                    ContextCompat.getColor(
-                        requireContext(), R.color.hint_dark
-                    )
-                )
-                binding.editing.setTextColor(Color.WHITE)
-                Object.changeDrawableTintColor(
-                    requireContext(), R.drawable.editing_txt_bg, R.color.white, binding.editing
-                )
+            content.getContentIfNotHandled().let { color ->
 
-                val tintColor = ContextCompat.getColor(requireContext(), R.color.white)
-                binding.backButton.setColorFilter(tintColor)
-                binding.save.setColorFilter(tintColor)
-            }
+                if (Object.isColorBright(color!!)) {
+                    binding.title.setTextColor(Color.BLACK)
+                    binding.body.setTextColor(Color.BLACK)
+                    binding.title.setHintTextColor(
+                        ContextCompat.getColor(
+                            requireContext(), R.color.hint_light
+                        )
+                    )
+                    binding.body.setHintTextColor(
+                        ContextCompat.getColor(
+                            requireContext(), R.color.hint_light
+                        )
+                    )
+                    binding.editing.setTextColor(Color.BLACK)
+                    Object.changeDrawableTintColor(
+                        requireContext(), R.drawable.editing_txt_bg, R.color.black, binding.editing
+                    )
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requireActivity().window.statusBarColor = Color.parseColor(color)
-                if (Object.isColorBright(color)) {
-                    requireActivity().window.decorView.systemUiVisibility =
-                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                    val tintColor = ContextCompat.getColor(requireContext(), R.color.black)
+                    binding.backButton.setColorFilter(tintColor)
+                    binding.save.setColorFilter(tintColor)
                 } else {
-                    requireActivity().window.decorView.systemUiVisibility = 0
-                }
-            }
+                    binding.title.setTextColor(Color.WHITE)
+                    binding.body.setTextColor(Color.WHITE)
+                    binding.title.setHintTextColor(
+                        ContextCompat.getColor(
+                            requireContext(), R.color.hint_dark
+                        )
+                    )
+                    binding.body.setHintTextColor(
+                        ContextCompat.getColor(
+                            requireContext(), R.color.hint_dark
+                        )
+                    )
+                    binding.editing.setTextColor(Color.WHITE)
+                    Object.changeDrawableTintColor(
+                        requireContext(), R.drawable.editing_txt_bg, R.color.white, binding.editing
+                    )
 
-            binding.root.setBackgroundColor(Color.parseColor(color))
-            binding.appBar.setBackgroundColor(Color.parseColor(color))
+                    val tintColor = ContextCompat.getColor(requireContext(), R.color.white)
+                    binding.backButton.setColorFilter(tintColor)
+                    binding.save.setColorFilter(tintColor)
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    requireActivity().window.statusBarColor = Color.parseColor(color)
+                    if (Object.isColorBright(color)) {
+                        requireActivity().window.decorView.systemUiVisibility =
+                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                    } else {
+                        requireActivity().window.decorView.systemUiVisibility = 0
+                    }
+                }
+
+                binding.root.setBackgroundColor(Color.parseColor(color))
+                binding.appBar.setBackgroundColor(Color.parseColor(color))
+            }
         }
 
         binding.colorPickerView.attachBrightnessSlider(binding.brightnessSlide)
@@ -186,7 +190,7 @@ class EditFragment : Fragment(), ColorEnvelopeListener {
         super.onDestroy()
 
         Koin().close()
-        noteDatabase.closeDatabase()
+//        noteDatabase.closeDatabase()
     }
 
     private fun setOneTimeWorkRequest() {

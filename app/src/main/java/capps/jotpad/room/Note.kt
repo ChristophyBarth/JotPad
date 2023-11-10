@@ -5,9 +5,11 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "note_data_table")
-data class Note(
+open class Note(
 
     @PrimaryKey @ColumnInfo(name = "note_id") val time: Long,
+
+    @ColumnInfo(name = "note_time") val lastUpdated: Long,
 
     @ColumnInfo(name = "note_title") var title: String,
 

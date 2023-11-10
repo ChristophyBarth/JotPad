@@ -3,11 +3,15 @@ package capps.jotpad.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import capps.jotpad.others.Event
 import capps.jotpad.others.Object
 import capps.jotpad.room.Note
 import capps.jotpad.room.NotePriority
 import capps.jotpad.room.NoteRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 class EditFragVM(
@@ -16,8 +20,8 @@ class EditFragVM(
     val title = MutableLiveData("")
     val body = MutableLiveData("")
 
-    private val _colorCode = MutableLiveData("")
-    val colorCode: LiveData<String> get() = _colorCode
+    private val _colorCode = MutableLiveData(Event(""))
+    val colorCode: LiveData<Event<String>> get() = _colorCode
 
     private val _statusMessage = MutableLiveData<Event<String>>()
     val statusMessage: LiveData<Event<String>> get() = _statusMessage
@@ -30,16 +34,16 @@ class EditFragVM(
 
     val fabShouldShow = MutableLiveData(true)
 
-    private val _backButton = MutableLiveData<Event<Boolean>>()
-    val backButton: LiveData<Event<Boolean>> get() = _backButton
+    private val _backButtonClicked = MutableLiveData<Event<Boolean>>()
+    val backButtonClicked: LiveData<Event<Boolean>> get() = _backButtonClicked
 
     init {
         if (editing) {
             title.value = note!!.title
             body.value = note.body
-            _colorCode.value = note.color
+            _colorCode.value = Event(note.color)
         } else {
-            _colorCode.value = Object.getRandomColorCode()
+            _colorCode.value = Event(Object.getRandomColorCode())
         }
     }
 
@@ -47,20 +51,27 @@ class EditFragVM(
         if (body.value!!.isBlank() && title.value!!.isBlank()) {
             toast("Empty note!")
         } else {
+            val currentTimeInMillis = Calendar.getInstance().timeInMillis
             if (!editing) {
                 insertNote(
                     Note(
-                        Calendar.getInstance().timeInMillis,
+                        currentTimeInMillis,
+                        currentTimeInMillis,
                         title.value!!,
                         body.value!!,
-                        colorCode.value!!,
+                        colorCode.value!!.peekContent(),
                         NotePriority.LOW
                     )
                 )
             } else {
                 updateNote(
                     Note(
-                        note!!.time, title.value!!, body.value!!, colorCode.value!!, note.priority
+                        note!!.time,
+                        currentTimeInMillis,
+                        title.value!!,
+                        body.value!!,
+                        colorCode.value!!.peekContent(),
+                        note.priority
                     )
                 )
             }
@@ -72,15 +83,35 @@ class EditFragVM(
     }
 
     private fun insertNote(note: Note) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val newRowID = repository.insert(note)
 
+            withContext(Dispatchers.Main) {
+                if (newRowID > -1) {
+                    toast("Note Saved")
+                } else {
+                    toast("We're Sorry, Your Note Was Not Saved")
+                }
+            }
+        }
     }
 
-    private fun updateNote(note: Note) {
+    fun updateNote(note: Note) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val numberOfRows = repository.update(note)
 
+            withContext(Dispatchers.Main) {
+                if (numberOfRows > 0) {
+                    toast("Note Updated")
+                } else {
+                    toast("We're Sorry, Your Note Was Not Updated")
+                }
+            }
+        }
     }
 
     fun colorReturned(hex: String) {
-        _colorCode.value = hex
+        _colorCode.value = Event(hex)
     }
 
     fun openBottomSheet() {
@@ -104,6 +135,6 @@ class EditFragVM(
     }
 
     fun exit() {
-        _backButton.value = Event(true)
+        _backButtonClicked.value = Event(true)
     }
 }
