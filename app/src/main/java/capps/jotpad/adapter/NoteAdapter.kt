@@ -1,5 +1,6 @@
 package capps.jotpad.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -20,9 +21,10 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
-class NoteAdapter(private val context: Context, private val notes: MutableList<Note>) :
+class NoteAdapter(private val context: Context) :
     RecyclerView.Adapter<NoteViewHolder>() {
 
+    private val notes = ArrayList<Note>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -31,6 +33,13 @@ class NoteAdapter(private val context: Context, private val notes: MutableList<N
         )
 
         return NoteViewHolder(binding)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setList(noteList: List<Note>) {
+        notes.clear()
+        notes.addAll(noteList)
+        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
@@ -88,7 +97,7 @@ class NoteViewHolder(private val binding: NoteItemBinding) : RecyclerView.ViewHo
         }
 
         binding.relativeLayout.setBackgroundColor(Color.parseColor(note.color))
-        binding.date.text = calculatedDate(note.time)
+        binding.date.text = calculatedDate(note.lastUpdated)
 
         binding.relativeLayout.setOnClickListener {
             val bundle = Bundle()

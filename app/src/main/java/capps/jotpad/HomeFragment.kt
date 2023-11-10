@@ -20,12 +20,9 @@ class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
     private lateinit var homeFragVM: HomeFragVM
     private lateinit var noteAdapter: NoteAdapter
-
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(layoutInflater, R.layout.fragment_home, container, false)
 
         val dao = NoteDatabase.getInstance(requireContext()).noteDAO
@@ -38,18 +35,24 @@ class HomeFragment : Fragment() {
 
         init()
 
+        homeFragVM.notes.observe(viewLifecycleOwner) { noteList ->
+            noteAdapter.setList(noteList.sortedBy {
+                it.lastUpdated
+            }.reversed())
+        }
+
         binding.newNote.setOnClickListener {
             val bundle = Bundle()
             bundle.putBoolean("editing", false)
             findNavController().navigate(R.id.action_homeFragment_to_editFragment, bundle)
         }
-
         return binding.root
     }
 
     private fun init() {
-        binding.noteRecyclerView.layoutManager =  StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
-        noteAdapter = NoteAdapter(requireContext(), homeFragVM.notes)
+        binding.noteRecyclerView.layoutManager =
+            StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
+        noteAdapter = NoteAdapter(requireContext())
         binding.noteRecyclerView.adapter = noteAdapter
     }
 
